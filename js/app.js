@@ -8,6 +8,10 @@
 	 * 用户登录
 	 **/
 	owner.login = function(loginInfo, callback) {
+		var settings = owner.getSettings();
+		if(!settings.host){
+			plus.nativeUI.toast("请正确填写服务器地址");
+		}
 		callback = callback || $.noop;
 		loginInfo = loginInfo || {};
 		loginInfo.account = loginInfo.account || '';
@@ -27,14 +31,20 @@
 		} else {
 			return callback('用户名或密码错误');
 		}*/
-		mui.ajax("http://192.168.100.125/j_acegi_security_check",{
+		$.ajax(settings.host+"/j_acegi_security_check",{
 			headers:{"ekp_flash_key":"ekp-i"},
 			data:{"j_username":loginInfo.account,"j_password":loginInfo.password},
 			dataType:"json",
 			type:"post",
 			success:function(data){
 				if(data.success=="true"){
-					plus.webview.open("http://192.168.100.125/index.jsp")
+					mui.openWindow({
+						"url":"main.html",
+						"id":"main",
+						"extras":{
+							"username":data.username
+						}
+						})
 				}else{
 					plus.nativeUI.toast(data.message);
 					return;
