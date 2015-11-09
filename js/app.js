@@ -35,19 +35,21 @@
 			headers:{"ekp_flash_key":"ekp-i"},
 			data:{"j_username":loginInfo.account,"j_password":loginInfo.password},
 			dataType:"json",
-			type:"post",
+			type:"get",
 			success:function(data){
-				if(data.success=="true"){
-					mui.openWindow({
-						"url":"main.html",
-						"id":"main",
-						"extras":{
-							"username":data.username
-						}
-						})
-				}else{
-					plus.nativeUI.toast(data.message);
-					return;
+				if(data){
+					if(data.success){
+						mui.openWindow({
+							"url":"main.html",
+							"id":"main",
+							"extras":{
+								"username":data.username
+							}
+							})
+					}else{
+						mui.toast(data.message);
+						return;
+					}
 				}
 			}
 		})
@@ -132,6 +134,10 @@
 	 **/
 	owner.getSettings = function() {
 		var settingsText = localStorage.getItem('$settings') || "{}";
-		return JSON.parse(settingsText);
+		var settings=JSON.parse(settingsText);
+		if(!settings.host){
+			settings.host="http://oa.sce-re.com";
+		}
+		return settings;
 	}
 }(mui, window.app = {}));

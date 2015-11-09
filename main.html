@@ -18,6 +18,13 @@
 				line-height: 40px;
 				vertical-align: middle;
 			}
+			.mui-icon .mui-badge {
+				position: absolute;
+				top: 6px;
+				left: 100%;
+				margin-left: -30px;
+				padding: 1px 0px;
+			}
 		</style>
 	</head>
 
@@ -31,18 +38,17 @@
 			</div>
 		</header>
 		<div class="mui-content">
-			<ul class="mui-table-view mui-grid-view mui-grid-9" id="table_menu">
+			<ul class="mui-table-view mui-grid-view mui-grid-12" id="table_menu">
 			</ul>
 		</div>
 		<script src="js/template.js" type="text/javascript" charset="utf-8"></script>
 		<script id="tmpl_menu" type="text/html">
-			<li class="mui-table-view-cell mui-media mui-col-xs-4">
+			<li class="mui-table-view-cell mui-media mui-col-xs-3">
 				<a href="#">
 					<span class="mui-icon">
 							<img src="{{iconUrl}}"/>
 							{{if count}}
-							<span class="mui-badge">{{count}}</span>
-							{{/if}}
+							<span class="mui-badge">{{count}}</span> {{/if}}
 					</span>
 					<div class="mui-media-body">{{name}}</div>
 				</a>
@@ -52,6 +58,7 @@
 		<script src="js/common.js" type="text/javascript" charset="utf-8"></script>
 		<script type="text/javascript">
 			mui.plusReady(function() {
+				var nwaiting = plus.nativeUI.showWaiting();//显示原生等待框
 				//用户名
 				var self = plus.webview.currentWebview();
 				document.getElementById("username").innerHTML = self.username;
@@ -60,20 +67,28 @@
 				mui.ajax(settings.host + "/third/pda/third_pda_config/thirdPdaConfig.do?method=menuDetail", {
 					dataType: "json",
 					type: "GET",
+					timeout:5000,
 					success: function(data) {
-						if (data.menus) {
-							var tmpl="";
+						if (data&&data.menus) {
+							var tmpl = "";
 							mui.each(data.menus, function(i, obj) {
-								obj.iconUrl=settings.host + iconPath+obj.icon;
+								obj.iconUrl = settings.host + iconPath + obj.icon;
 								if (obj.countUrl) {
-									mui.ajax(settings.host +obj.countUrl,{"async":false,dataType:"json", success:function(countObj) {
-										obj.count = countObj.count; 
-									}})
+									mui.ajax(settings.host + obj.countUrl, {
+										"async": false,
+										dataType: "json",
+										success: function(countObj) {
+											obj.count = countObj.count;
+										}
+									})
 								}
-								tmpl+=template("tmpl_menu",obj);
+								tmpl += template("tmpl_menu", obj);
 							})
-							document.getElementById("table_menu").innerHTML=tmpl;
+							document.getElementById("table_menu").innerHTML = tmpl;
+						}else{
+							plus.webview.open("login.html");
 						}
+						nwaiting.close();
 					}
 				})
 			})

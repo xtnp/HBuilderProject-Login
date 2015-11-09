@@ -231,6 +231,12 @@
 							}
 //							toMain();
 						});
+						//保存帐号、密码
+						if(rememberPwdButton.classList.contains("mui-active")){
+							settings.account=accountBox.value;
+							settings.password=passwordBox.value;
+							app.setSettings(settings);
+						}
 					});
 					settingButton.addEventListener("tap",function(){
 						plus.webview.open("setting.html");
