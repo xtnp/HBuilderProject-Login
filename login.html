@@ -69,7 +69,7 @@
 			.oauth-area .oauth-btn:active {
 				border: solid 1px #aaa;
 			}
-			#logo{
+			#logo {
 				height: 120px;
 			}
 		</style>
@@ -79,7 +79,7 @@
 	<body>
 		<div class="mui-content">
 			<div class="mui-content-padded mui-text-center">
-				<img id="logo" src="images/logo.png"/>
+				<img id="logo" src="images/logo.png" />
 			</div>
 			<form id='login-form' class="mui-input-group">
 				<div class="mui-input-row">
@@ -110,11 +110,11 @@
 
 			</div>
 		</div>
-			<nav class="mui-bar mui-bar-tab">
-				<div class="mui-pull-right">
-					<span class="mui-icon mui-icon-gear" id="setting"></span>
-				</div>
-			</nav>
+		<nav class="mui-bar mui-bar-tab">
+			<div class="mui-pull-right">
+				<span class="mui-icon mui-icon-gear" id="setting"></span>
+			</div>
+		</nav>
 		<script src="js/mui.min.js"></script>
 		<script src="js/mui.enterfocus.js"></script>
 		<script src="js/app.js"></script>
@@ -124,24 +124,41 @@
 					statusBarBackground: '#f7f7f7'
 				});
 				$.plusReady(function() {
-					plus.screen.lockOrientation("portrait-primary");
-					var settings = app.getSettings();
-					var accountBox = doc.getElementById('account');
-					var passwordBox = doc.getElementById('password');
-					if(settings.rememberPwd){
-						accountBox.value= settings.account;
-						passwordBox.value= settings.password;
-					}
-					/*var state = app.getState();
-					var mainPage = $.preload({
-						"id": 'main',
-						"url": 'main.html'
-					});
-					var toMain = function() {
-						$.fire(mainPage, 'show', null);
-						setTimeout(function() {
+					if (plus.networkinfo.getCurrentType() == plus.networkinfo.CONNECTION_NONE) {
+						mui.toast("当前网络不给力，无法加载广告");
+					} else {
+						plus.screen.lockOrientation("portrait-primary");
+						var settings = app.getSettings();
+						var accountBox = doc.getElementById('account');
+						var passwordBox = doc.getElementById('password');
+						if (settings.rememberPwd) {
+							accountBox.value = settings.account;
+							passwordBox.value = settings.password;
+						}
+						/*var state = app.getState();
+						var mainPage = $.preload({
+							"id": 'main',
+							"url": 'main.html'
+						});
+						var toMain = function() {
+							$.fire(mainPage, 'show', null);
+							setTimeout(function() {
+								$.openWindow({
+									id: 'main',
+									show: {
+										aniShow: 'pop-in'
+									},
+									waiting: {
+										autoShow: false
+									}
+								});
+							}, 0);
+						};*/
+						/*//检查 "登录状态/锁屏状态" 开始
+						if (settings.rememberPwd && state.token && settings.gestures) {
 							$.openWindow({
-								id: 'main',
+								url: 'unlock.html',
+								id: 'unlock',
 								show: {
 									aniShow: 'pop-in'
 								},
@@ -149,161 +166,148 @@
 									autoShow: false
 								}
 							});
-						}, 0);
-					};*/
-					/*//检查 "登录状态/锁屏状态" 开始
-					if (settings.rememberPwd && state.token && settings.gestures) {
-						$.openWindow({
-							url: 'unlock.html',
-							id: 'unlock',
-							show: {
-								aniShow: 'pop-in'
-							},
-							waiting: {
-								autoShow: false
-							}
-						});
-					} else if (settings.rememberPwd && state.token) {
-						toMain();
-					} else {
-						//第三方登录
-						var auths = {};
-						var oauthArea = doc.querySelector('.oauth-area');
-						plus.oauth.getServices(function(services) {
-							for (var i in services) {
-								var service = services[i];
-								auths[service.id] = service;
-								var btn = document.createElement('div');
-								btn.setAttribute('class', 'oauth-btn');
-								btn.authId = service.id;
-								btn.style.backgroundImage = 'url("images/' + service.id + '.png")'
-									//alert(service.id);
-									//btn.innerText = service.description + "登录";
-								oauthArea.appendChild(btn);
-							}
-							$(oauthArea).on('tap', '.oauth-btn', function() {
-								var auth = auths[this.authId];
-								var waiting = plus.nativeUI.showWaiting();
-								auth.login(function() {
-									waiting.close();
-									plus.nativeUI.toast("登录认证成功");
-									//alert(JSON.stringify(auth.authResult));
-									auth.getUserInfo(function() {
-										plus.nativeUI.toast("获取用户信息成功");
-										//alert(JSON.stringify(auth.userInfo));
-										var name = auth.userInfo.nickname || auth.userInfo.name;
-										app.createState(name, function() {
-											toMain();
+						} else if (settings.rememberPwd && state.token) {
+							toMain();
+						} else {
+							//第三方登录
+							var auths = {};
+							var oauthArea = doc.querySelector('.oauth-area');
+							plus.oauth.getServices(function(services) {
+								for (var i in services) {
+									var service = services[i];
+									auths[service.id] = service;
+									var btn = document.createElement('div');
+									btn.setAttribute('class', 'oauth-btn');
+									btn.authId = service.id;
+									btn.style.backgroundImage = 'url("images/' + service.id + '.png")'
+										//alert(service.id);
+										//btn.innerText = service.description + "登录";
+									oauthArea.appendChild(btn);
+								}
+								$(oauthArea).on('tap', '.oauth-btn', function() {
+									var auth = auths[this.authId];
+									var waiting = plus.nativeUI.showWaiting();
+									auth.login(function() {
+										waiting.close();
+										plus.nativeUI.toast("登录认证成功");
+										//alert(JSON.stringify(auth.authResult));
+										auth.getUserInfo(function() {
+											plus.nativeUI.toast("获取用户信息成功");
+											//alert(JSON.stringify(auth.userInfo));
+											var name = auth.userInfo.nickname || auth.userInfo.name;
+											app.createState(name, function() {
+												toMain();
+											});
+										}, function(e) {
+											plus.nativeUI.toast("获取用户信息失败：" + e.message);
 										});
 									}, function(e) {
-										plus.nativeUI.toast("获取用户信息失败：" + e.message);
+										waiting.close();
+										plus.nativeUI.toast("登录认证失败：" + e.message);
 									});
-								}, function(e) {
-									waiting.close();
-									plus.nativeUI.toast("登录认证失败：" + e.message);
 								});
+							}, function(e) {
+								oauthArea.style.display = 'none';
+								plus.nativeUI.toast("获取登录认证失败：" + e.message);
 							});
-						}, function(e) {
-							oauthArea.style.display = 'none';
-							plus.nativeUI.toast("获取登录认证失败：" + e.message);
+						}*/
+						// close splash
+						setTimeout(function() {
+							//关闭 splash
+							plus.navigator.closeSplashscreen();
+						}, 600);
+						//检查 "登录状态/锁屏状态" 结束
+						var loginButton = doc.getElementById('login');
+						var rememberPwdButton = doc.getElementById("rememberPwd");
+						var settingButton = doc.getElementById("setting");
+						/*var regButton = doc.getElementById('reg');
+						var forgetButton = doc.getElementById('forgetPassword');*/
+						loginButton.addEventListener('tap', function(event) {
+							var loginInfo = {
+								account: accountBox.value,
+								password: passwordBox.value
+							};
+							app.login(loginInfo, function(err) {
+								if (err) {
+									plus.nativeUI.toast(err);
+									return;
+								}
+								//							toMain();
+							});
+							//保存帐号、密码
+							if (rememberPwdButton.classList.contains("mui-active")) {
+								settings.account = accountBox.value;
+								settings.password = passwordBox.value;
+								app.setSettings(settings);
+							}
 						});
-					}*/
-					// close splash
-					setTimeout(function() {
-						//关闭 splash
-						plus.navigator.closeSplashscreen();
-					}, 600);
-					//检查 "登录状态/锁屏状态" 结束
-					var loginButton = doc.getElementById('login');
-					var rememberPwdButton = doc.getElementById("rememberPwd");
-					var settingButton=doc.getElementById("setting");
-					/*var regButton = doc.getElementById('reg');
-					var forgetButton = doc.getElementById('forgetPassword');*/
-					loginButton.addEventListener('tap', function(event) {
-						var loginInfo = {
-							account: accountBox.value,
-							password: passwordBox.value
+						settingButton.addEventListener("tap", function() {
+							plus.webview.open("setting.html");
+						})
+						$.enterfocus('#login-form input', function() {
+							$.trigger(loginButton, 'tap');
+						});
+						rememberPwdButton.classList[settings.rememberPwd ? 'add' : 'remove']('mui-active')
+						rememberPwdButton.addEventListener('toggle', function(event) {
+							setTimeout(function() {
+								var isActive = event.detail.isActive;
+								settings.rememberPwd = isActive;
+								if (isActive) {
+									settings.account = accountBox.value;
+									settings.password = passwordBox.value;
+								}
+								app.setSettings(settings);
+							}, 50);
+						}, false);
+						/*regButton.addEventListener('tap', function(event) {
+							$.openWindow({
+								url: 'reg.html',
+								id: 'reg',
+								show: {
+									aniShow: 'pop-in'
+								},
+								styles: {
+									popGesture: 'hide'
+								},
+								waiting: {
+									autoShow: false
+								}
+							});
+						}, false);
+						forgetButton.addEventListener('tap', function(event) {
+							$.openWindow({
+								url: 'forget_password.html',
+								id: 'forget_password',
+								show: {
+									aniShow: 'pop-in'
+								},
+								styles: {
+									popGesture: 'hide'
+								},
+								waiting: {
+									autoShow: false
+								}
+							});
+						}, false);*/
+						//
+						/*window.addEventListener('resize', function() {
+							oauthArea.style.display = document.body.clientHeight > 400 ? 'block' : 'none';
+						}, false);*/
+						//
+						var backButtonPress = 0;
+						$.back = function(event) {
+							backButtonPress++;
+							if (backButtonPress > 1) {
+								plus.runtime.quit();
+							} else {
+								plus.nativeUI.toast('再按一次退出应用');
+							}
+							setTimeout(function() {
+								backButtonPress = 0;
+							}, 1000);
+							return false;
 						};
-						app.login(loginInfo, function(err) {
-							if (err) {
-								plus.nativeUI.toast(err);
-								return;
-							}
-//							toMain();
-						});
-						//保存帐号、密码
-						if(rememberPwdButton.classList.contains("mui-active")){
-							settings.account=accountBox.value;
-							settings.password=passwordBox.value;
-							app.setSettings(settings);
-						}
-					});
-					settingButton.addEventListener("tap",function(){
-						plus.webview.open("setting.html");
-					})
-					$.enterfocus('#login-form input', function() {
-						$.trigger(loginButton, 'tap');
-					});
-					rememberPwdButton.classList[settings.rememberPwd ? 'add' : 'remove']('mui-active')
-					rememberPwdButton.addEventListener('toggle', function(event) {
-						setTimeout(function() {
-							var isActive = event.detail.isActive;
-							settings.rememberPwd = isActive;
-							if(isActive){
-								settings.account=accountBox.value;
-								settings.password=passwordBox.value;
-							}
-							app.setSettings(settings);
-						}, 50);
-					}, false);
-					/*regButton.addEventListener('tap', function(event) {
-						$.openWindow({
-							url: 'reg.html',
-							id: 'reg',
-							show: {
-								aniShow: 'pop-in'
-							},
-							styles: {
-								popGesture: 'hide'
-							},
-							waiting: {
-								autoShow: false
-							}
-						});
-					}, false);
-					forgetButton.addEventListener('tap', function(event) {
-						$.openWindow({
-							url: 'forget_password.html',
-							id: 'forget_password',
-							show: {
-								aniShow: 'pop-in'
-							},
-							styles: {
-								popGesture: 'hide'
-							},
-							waiting: {
-								autoShow: false
-							}
-						});
-					}, false);*/
-					//
-					/*window.addEventListener('resize', function() {
-						oauthArea.style.display = document.body.clientHeight > 400 ? 'block' : 'none';
-					}, false);*/
-					//
-					var backButtonPress = 0;
-					$.back = function(event) {
-						backButtonPress++;
-						if (backButtonPress > 1) {
-							plus.runtime.quit();
-						} else {
-							plus.nativeUI.toast('再按一次退出应用');
-						}
-						setTimeout(function() {
-							backButtonPress = 0;
-						}, 1000);
-						return false;
-					};
+					}
 				});
 			}(mui, document));
 		</script>

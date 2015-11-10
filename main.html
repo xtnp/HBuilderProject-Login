@@ -44,7 +44,7 @@
 		<script src="js/template.js" type="text/javascript" charset="utf-8"></script>
 		<script id="tmpl_menu" type="text/html">
 			<li class="mui-table-view-cell mui-media mui-col-xs-3">
-				<a href="#">
+				<a href="#" data-id="{{id}}" data-url="{{url}}" data-name="{{name}}">
 					<span class="mui-icon">
 							<img src="{{iconUrl}}"/>
 							{{if count}}
@@ -82,6 +82,9 @@
 										}
 									})
 								}
+								if(obj.subMenuType=="doc"){
+									obj.url=(obj.submenus[0].contentUrl.indexOf("http")==0?"":settings.host) + obj.submenus[0].contentUrl;
+								}
 								tmpl += template("tmpl_menu", obj);
 							})
 							document.getElementById("table_menu").innerHTML = tmpl;
@@ -90,6 +93,17 @@
 						}
 						nwaiting.close();
 					}
+				})
+				mui(".mui-table-view").on("tap","li a",function(){
+					var name=this.getAttribute("data-name");
+					var url=this.getAttribute("data-url");
+					console.log(url);
+					mui.openWindow("doc.html",{
+						"extras":{
+							title:name,
+							url:url
+						}
+					});
 				})
 			})
 		</script>
