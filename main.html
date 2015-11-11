@@ -44,11 +44,12 @@
 		<script src="js/template.js" type="text/javascript" charset="utf-8"></script>
 		<script id="tmpl_menu" type="text/html">
 			<li class="mui-table-view-cell mui-media mui-col-xs-3">
-				<a href="#" data-id="{{id}}" data-url="{{url}}" data-name="{{name}}">
+				<a href="#" data-id="{{id}}" data-url="{{url}}" data-name="{{name}}" data-type="{{subMenuType}}">
 					<span class="mui-icon">
 							<img src="{{iconUrl}}"/>
 							{{if count}}
-							<span class="mui-badge">{{count}}</span> {{/if}}
+							<span class="mui-badge">{{count}}</span> 
+							{{/if}}
 					</span>
 					<div class="mui-media-body">{{name}}</div>
 				</a>
@@ -84,6 +85,16 @@
 								}
 								if(obj.subMenuType=="doc"){
 									obj.url=(obj.submenus[0].contentUrl.indexOf("http")==0?"":settings.host) + obj.submenus[0].contentUrl;
+								}else if(obj.subMenuType=="listTab"){
+									for(i=0;i<obj.submenus.length;i++){
+										if(obj.submenus[i].contentUrl){
+											obj.submenus[i].url=(obj.submenus[i].contentUrl.indexOf("http")==0?"":settings.host) + obj.submenus[i].contentUrl;
+										}
+										if(obj.submenus[i].countUrl){
+											obj.submenus[i].curl=(obj.submenus[i].countUrl.indexOf("http")==0?"":settings.host) + obj.submenus[i].countUrl;
+										}
+									}
+									obj.url=JSON.stringify(obj.submenus);
 								}
 								tmpl += template("tmpl_menu", obj);
 							})
@@ -97,13 +108,22 @@
 				mui(".mui-table-view").on("tap","li a",function(){
 					var name=this.getAttribute("data-name");
 					var url=this.getAttribute("data-url");
-					console.log(url);
-					mui.openWindow("doc.html",{
-						"extras":{
-							title:name,
-							url:url
-						}
-					});
+					var type=this.getAttribute("data-type");
+					if("doc"==type){
+						mui.openWindow("doc.html",{
+							"extras":{
+								title:name,
+								url:url
+							}
+						});
+					}else if("listTab"==type){
+						mui.openWindow("listTab.html",{
+							"extras":{
+								title:name,
+								submenus:JSON.parse(url)
+							}
+						});
+					}
 				})
 			})
 		</script>

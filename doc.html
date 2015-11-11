@@ -18,9 +18,7 @@
 			<h1 class="mui-title" id="title"></h1>
 		</header>
 		<div class="mui-content">
-			<div class="mui-content-padded">
 				
-			</div>
 		</div>
 	</body>
 	<script type="text/javascript">
@@ -42,7 +40,7 @@
 				//目前Android平台不支持子webview的setStyle动画，因此分平台处理；
 				if(mui.os.ios){
 					//为了支持iOS平台左侧边缘滑动关闭页面，需要append进去；
-					plus.webview.currentWebview().append(ad);
+					self.append(ad);
 					/*ad.addEventListener('loaded',function () {
 						ad.setStyle({
 							bottom:'0',
