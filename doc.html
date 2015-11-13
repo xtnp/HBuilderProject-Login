@@ -24,7 +24,7 @@
 	<script type="text/javascript">
 		mui.plusReady(function () {
 			if(plus.networkinfo.getCurrentType() == plus.networkinfo.CONNECTION_NONE){
-				mui.toast("当前网络不给力，无法加载广告");
+				mui.toast("当前网络不给力，无法加载页面");
 			}else{
 				var self=plus.webview.currentWebview();
 				document.getElementById("title").innerText=self.title;

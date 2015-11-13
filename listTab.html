@@ -84,9 +84,6 @@
 				font-size: 16px;
 			}
 		</style>
-		<script type="text/javascript" charset="utf-8">
-			mui.init();
-		</script>
 	</head>
 
 	<body>
@@ -97,26 +94,35 @@
 		<div class="mui-content">
 			<div id="slider" class="mui-slider mui-fullscreen">
 				<div id="sliderSegmentedControl" class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
-					<div class="mui-scroll" id="tab"></div>
+					<div class="mui-scroll" id="tab">
+					</div>
 				</div>
 				<div class="mui-slider-group" id="list">
-
+					<div class="mui-slider-item mui-control-content">
+					
+					</div>
 				</div>
 			</div>
 		</div>
 		<script src="js/template.js" type="text/javascript" charset="utf-8"></script>
 		<script id="tmpl_list" type="text/html">
-			{{if id>0}}
-			<div id="tab{{id}}" class="mui-slider-item mui-control-content">
-			{{else}}
+			{{if id==0}}
 			<div id="tab{{id}}" class="mui-slider-item mui-control-content mui-active">
+			{{else}}
+			<div id="tab{{id}}" class="mui-slider-item mui-control-content">
 			{{/if}}
-				<div id="scroll{{id}}" class="mui-scroll-wrapper">
+				<div id="scroll{{id}}" class="mui-scroll-wrapper" data-pageno="{{id+1}}" data-url="{{url}}">
 					<div class="mui-scroll">
 						<ul class="mui-table-view">
 							{{each list as value i}}
-							<li class="mui-table-view-cell">
-								{{value.subject}}
+							<li class="mui-table-view-cell" data-url="{{value.url}}" data-title="{{value.subject}}">
+								{{if value.picUrl}}
+								<img class="mui-media-object mui-pull-left" src="{{value.picUrl}}">
+								{{/if}}
+								<div class="mui-media-body mui-ellipsis">
+									{{value.subject}}
+									<p class='mui-ellipsis'>{{value.summary}}</p>
+								</div>
 							</li>
 							{{/each}}
 						</ul>
@@ -124,86 +130,95 @@
 				</div>
 			</div>
 		</script>
+		<script id="tmpl_refresh" type="text/html">
+			{{each list as value i}}
+			<li class="mui-table-view-cell" data-url="{{value.url}}" data-title="{{value.subject}}">
+				{{if value.picUrl}}
+				<img class="mui-media-object mui-pull-left" src="{{value.picUrl}}">
+				{{/if}}
+				<div class="mui-media-body mui-ellipsis">
+					{{value.subject}}
+					<p class='mui-ellipsis'>{{value.summary}}</p>
+				</div>
+			</li>
+			{{/each}}
+		</script>
 		<script src="js/common.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/app.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/jquery.js"></script>
 		<script src="js/mui.pullToRefresh.js"></script>
 		<script src="js/mui.pullToRefresh.material.js"></script>
 		<script type="text/javascript">
-			mui.plusReady(function() {
-				if (plus.networkinfo.getCurrentType() == plus.networkinfo.CONNECTION_NONE) {
-					mui.toast("当前网络不给力，无法加载广告");
-				} else {
-					var self = plus.webview.currentWebview();
-					document.getElementById("title").innerText = self.title;
-					//屏幕真实宽度
-					var height = window.innerHeight;
-					//根据投放广告的比例，计算广告高度
-					var adHeight = parseInt(height) - 45;
-					var url = self.url;
-					var ad = plus.webview.create(url, 'ad', {
-						height: adHeight + 'px',
-						top: '45px'
-					});
-					//目前Android平台不支持子webview的setStyle动画，因此分平台处理；
-					if (mui.os.ios) {
-						//为了支持iOS平台左侧边缘滑动关闭页面，需要append进去；
-						self.append(ad);
-					} else {
-						ad.addEventListener('loaded', function() {
-							ad.show();
-						});
-					}
-				}
-			});
+			mui.init();
 			(function($) {
 				//阻尼系数
 				var deceleration = mui.os.ios?0.003:0.0009;
-				$('.mui-scroll-wrapper').scroll({
-					bounce: false,
-					indicators: true, //是否显示滚动条
-					deceleration:deceleration
-				});
 				$.plusReady(function() {
+					var nwaiting = plus.nativeUI.showWaiting();//显示原生等待框
+					var settings=app.getSettings();
 					var self = plus.webview.currentWebview();
 					document.getElementById("title").innerText = self.title;	//标题
 					var tab="";
 					var list="";
 					var submenus=self.submenus;
-					for(i=0;i<submenus.length;i++){
+					for(var i=0;i<submenus.length;i++){
 						jQuery.ajax(submenus[i].url,{
 							dataType:"json",
 							async:false,
 							success:function(data){
-								if(data.errorPage){
-									 
-								}else{
-									var obj={};
-									obj.id=i;
+								var obj={};
+								obj.id=i;
+								obj.url=submenus[i].url;
+								if(data.count){
 									obj.count=data.count;
+								}
+								if(data.docs){
 									obj.list=data.docs; 
-									list+=template("tmpl_list",obj);
+									for(var j=0;j<obj.list.length;j++){
+										if(obj.list[j].url){
+											obj.list[j].url=obj.list[j].url.indexOf("http")==0?obj.list[j].url:settings.host+obj.list[j].url;
+										}
+										if(obj.list[j].picUrl){
+											obj.list[j].picUrl=obj.list[j].picUrl.indexOf("http")==0?obj.list[j].picUrl:settings.host+obj.list[j].picUrl;
+										}
+									}
+								}
+								list+=template("tmpl_list",obj);
+								if(i==0){
+									tab+='<a class="mui-control-item mui-active" href="#tab'+i+'" id="link'+i+'">'+submenus[i].name+(data.count?'('+data.count+')':'')+'</a>';
+								}else{
+									tab+='<a class="mui-control-item" href="#tab'+i+'" id="link'+i+'">'+submenus[i].name+(data.count?'('+data.count+')':'')+'</a>';
 								}
 							}
 						})
-						if(i==0){
-							var count;
-							tab+='<a class="mui-control-item mui-active" href="tab'+i+'">'+submenus[i].name+(count?'('+count+')':'')+'</a>';
-						}else{
-							tab+='<a class="mui-control-item" href="tab'+i+'">'+submenus[i].name+'</a>';
-						}
 					}
 					document.getElementById("tab").innerHTML=tab;
 					document.getElementById("list").innerHTML=list;
-					
+					//打开详细页面
+					$(".mui-table-view").on("tap","li",function(){
+						var url=this.getAttribute("data-url");
+						var title=this.getAttribute("data-title");
+						mui.openWindow("doc.html",{
+							extras:{
+								title:title,
+								url:url
+							}
+						})
+					})
+					$('.mui-scroll-wrapper').scroll({
+						bounce: false,
+						indicators: true, //是否显示滚动条
+						deceleration:deceleration
+					});
 					//循环初始化所有下拉刷新，上拉加载。
-					/*$.each(document.querySelectorAll('.mui-slider-group .mui-scroll'), function(index, pullRefreshEl) {
+					$.each(document.querySelectorAll('.mui-slider-group .mui-scroll'), function(index, pullRefreshEl) {
 						$(pullRefreshEl).pullToRefresh({
 							down: {
 								callback: function() {
 									var self = this;
 									setTimeout(function() {
 										var ul = self.element.querySelector('.mui-table-view');
-										ul.insertBefore(createFragment(ul, index, 10, true), ul.firstChild);
+										ul.innerHTML=createFragment(index,false);
 										self.endPullDownToRefresh();
 									}, 1000);
 								}
@@ -213,24 +228,45 @@
 									var self = this;
 									setTimeout(function() {
 										var ul = self.element.querySelector('.mui-table-view');
-										ul.appendChild(createFragment(ul, index, 5));
+										ul.innerHTML+=createFragment(index,true);
 										self.endPullUpToRefresh();
 									}, 1000);
 								}
 							}
 						});
-					});*/
-					var createFragment = function(ul, index, count, reverse) {
-						var length = ul.querySelectorAll('li').length;
-						var fragment = document.createDocumentFragment();
-						var li;
-						for (var i = 0; i < count; i++) {
-							li = document.createElement('li');
-							li.className = 'mui-table-view-cell';
-							li.innerHTML = '第' + (index + 1) + '个选项卡子项-' + (length + (reverse ? (count - i) : (i + 1)));
-							fragment.appendChild(li);
+					});
+					nwaiting.close();//关闭等待框
+					//页面数据加载
+					var createFragment = function(index,isLoading) {
+						var scroll=document.getElementById("scroll"+index);
+						var nextPageno=1;
+						if(isLoading){
+							nextPageno=scroll.getAttribute("data-pageno")+1;
 						}
-						return fragment;
+						var url=scroll.getAttribute("data-url");
+						var list="";
+						jQuery.ajax(url+"&pageno="+nextPageno,{
+							dataType:"json",
+							async:false,
+							success:function(data){
+								var obj={};
+								if(data.count){
+									var tabname=document.getElementById("link"+index);
+									var tabText=tabname.innerHTML;
+									tabname.innerHTML=tabText.substring(0,tabText.indexOf("(")>0?tabText.indexOf("("):tabText.length)+"("+data.count+")";
+								}
+								if(data.docs){
+									obj.list=data.docs; 
+									for(var j=0;j<obj.list.length;j++){
+										if(obj.list[j].picUrl){
+											obj.list[j].picUrl=obj.list[j].picUrl.indexOf("http")==0?obj.list[j].picUrl:settings.host+obj.list[j].picUrl;
+										}
+									}
+								}
+								list+=template("tmpl_refresh",obj);
+							}
+						})
+						return list;
 					};
 				});
 			})(mui);

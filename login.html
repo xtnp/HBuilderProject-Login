@@ -109,12 +109,12 @@
 			<div class="mui-content-padded oauth-area">
 
 			</div>
-		</div>
 		<nav class="mui-bar mui-bar-tab">
 			<div class="mui-pull-right">
 				<span class="mui-icon mui-icon-gear" id="setting"></span>
 			</div>
 		</nav>
+		</div>
 		<script src="js/mui.min.js"></script>
 		<script src="js/mui.enterfocus.js"></script>
 		<script src="js/app.js"></script>
@@ -132,8 +132,24 @@
 						var accountBox = doc.getElementById('account');
 						var passwordBox = doc.getElementById('password');
 						if (settings.rememberPwd) {
-							accountBox.value = settings.account;
-							passwordBox.value = settings.password;
+							if(settings.account){
+								accountBox.value = settings.account;
+							}
+							if(settings.password){
+								passwordBox.value = settings.password;
+							}
+						}
+						if (settings.autoLogin) {
+							var loginInfo = {
+								account: accountBox.value,
+								password: passwordBox.value
+							};
+							app.login(loginInfo, function(err) {
+								if (err) {
+									plus.nativeUI.toast(err);
+									return;
+								}
+							});
 						}
 						/*var state = app.getState();
 						var mainPage = $.preload({
@@ -242,7 +258,11 @@
 							}
 						});
 						settingButton.addEventListener("tap", function() {
-							plus.webview.open("setting.html");
+							$.openWindow("setting.html","setting",{
+								extras:{
+									isLogin:true
+								}
+							});
 						})
 						$.enterfocus('#login-form input', function() {
 							$.trigger(loginButton, 'tap');

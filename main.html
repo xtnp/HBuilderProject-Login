@@ -40,6 +40,11 @@
 		<div class="mui-content">
 			<ul class="mui-table-view mui-grid-view mui-grid-12" id="table_menu">
 			</ul>
+		<nav class="mui-bar mui-bar-tab">
+			<div class="mui-pull-right">
+				<span class="mui-icon mui-icon-gear" id="setting"></span>
+			</div>
+		</nav>
 		</div>
 		<script src="js/template.js" type="text/javascript" charset="utf-8"></script>
 		<script id="tmpl_menu" type="text/html">
@@ -125,6 +130,9 @@
 							}
 						});
 					}
+				})
+				document.getElementById("setting").addEventListener("tap", function() {
+					plus.webview.open("setting.html");
 				})
 			})
 		</script>

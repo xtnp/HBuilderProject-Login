@@ -10,7 +10,7 @@
 	owner.login = function(loginInfo, callback) {
 		var settings = owner.getSettings();
 		if(!settings.host){
-			plus.nativeUI.toast("请正确填写服务器地址");
+			$.toast("请正确填写服务器地址");
 		}
 		callback = callback || $.noop;
 		loginInfo = loginInfo || {};
@@ -51,6 +51,22 @@
 						return;
 					}
 				}
+			}
+		})
+	};
+	/**
+	 * 用户登出
+	 **/
+	owner.logout = function() {
+		var settings = owner.getSettings();
+		settings.autoLogin=false;
+		owner.setSettings(settings);
+		$.ajax(settings.host+"/third/pda/logout.jsp",{
+			headers:{"ekp_flash_key":"ekp-i"},
+			dataType:"json",
+			type:"get",
+			complete:function(data){
+				mui.openWindow("login.html")
 			}
 		})
 	};
