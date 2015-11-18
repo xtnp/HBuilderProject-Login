@@ -37,6 +37,8 @@
 				
 				var url = self.url;
 				var ad = plus.webview.create(url,'ad',{height:adHeight+'px',top:'45px'});
+				ad.appendJsFile("_www/js/jquery.js");
+				ad.appendJsFile("_www/js/download.js");
 				//目前Android平台不支持子webview的setStyle动画，因此分平台处理；
 				if(mui.os.ios){
 					//为了支持iOS平台左侧边缘滑动关闭页面，需要append进去；
