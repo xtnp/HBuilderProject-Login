@@ -116,14 +116,14 @@
 					var url=this.getAttribute("data-url");
 					var type=this.getAttribute("data-type");
 					if("doc"==type){
-						mui.openWindow("doc.html",{
+						mui.openWindow("doc.html","doc",{
 							"extras":{
 								title:name,
 								url:url
 							}
 						});
 					}else if("listTab"==type){
-						mui.openWindow("listTab.html",{
+						mui.openWindow("listTab.html","listTab",{
 							"extras":{
 								title:name,
 								submenus:JSON.parse(url)
