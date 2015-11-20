@@ -151,6 +151,83 @@
 								}
 							});
 						}
+						/*var state = app.getState();
+						var mainPage = $.preload({
+							"id": 'main',
+							"url": 'main.html'
+						});
+						var toMain = function() {
+							$.fire(mainPage, 'show', null);
+							setTimeout(function() {
+								$.openWindow({
+									id: 'main',
+									show: {
+										aniShow: 'pop-in'
+									},
+									waiting: {
+										autoShow: false
+									}
+								});
+							}, 0);
+						};*/
+						/*//检查 "登录状态/锁屏状态" 开始
+						if (settings.rememberPwd && state.token && settings.gestures) {
+							$.openWindow({
+								url: 'unlock.html',
+								id: 'unlock',
+								show: {
+									aniShow: 'pop-in'
+								},
+								waiting: {
+									autoShow: false
+								}
+							});
+						} else if (settings.rememberPwd && state.token) {
+							toMain();
+						} else {
+							//第三方登录
+							var auths = {};
+							var oauthArea = doc.querySelector('.oauth-area');
+							plus.oauth.getServices(function(services) {
+								for (var i in services) {
+									var service = services[i];
+									auths[service.id] = service;
+									var btn = document.createElement('div');
+									btn.setAttribute('class', 'oauth-btn');
+									btn.authId = service.id;
+									btn.style.backgroundImage = 'url("images/' + service.id + '.png")'
+										//alert(service.id);
+										//btn.innerText = service.description + "登录";
+									oauthArea.appendChild(btn);
+								}
+								$(oauthArea).on('tap', '.oauth-btn', function() {
+									var auth = auths[this.authId];
+									var waiting = plus.nativeUI.showWaiting();
+									auth.login(function() {
+										waiting.close();
+										plus.nativeUI.toast("登录认证成功");
+										//alert(JSON.stringify(auth.authResult));
+										auth.getUserInfo(function() {
+											plus.nativeUI.toast("获取用户信息成功");
+											//alert(JSON.stringify(auth.userInfo));
+											var name = auth.userInfo.nickname || auth.userInfo.name;
+											app.createState(name, function() {
+												toMain();
+											});
+										}, function(e) {
+											plus.nativeUI.toast("获取用户信息失败：" + e.message);
+										});
+									}, function(e) {
+										waiting.close();
+										plus.nativeUI.toast("登录认证失败：" + e.message);
+									});
+								});
+							}, function(e) {
+								oauthArea.style.display = 'none';
+								plus.nativeUI.toast("获取登录认证失败：" + e.message);
+							});
+						}*/
+						// close splash
 						setTimeout(function() {
 							//关闭 splash
 							plus.navigator.closeSplashscreen();
@@ -159,6 +236,8 @@
 						var loginButton = doc.getElementById('login');
 						var rememberPwdButton = doc.getElementById("rememberPwd");
 						var settingButton = doc.getElementById("setting");
+						/*var regButton = doc.getElementById('reg');
+						var forgetButton = doc.getElementById('forgetPassword');*/
 						loginButton.addEventListener('tap', function(event) {
 							var loginInfo = {
 								account: accountBox.value,
@@ -200,6 +279,41 @@
 								app.setSettings(settings);
 							}, 50);
 						}, false);
+						/*regButton.addEventListener('tap', function(event) {
+							$.openWindow({
+								url: 'reg.html',
+								id: 'reg',
+								show: {
+									aniShow: 'pop-in'
+								},
+								styles: {
+									popGesture: 'hide'
+								},
+								waiting: {
+									autoShow: false
+								}
+							});
+						}, false);
+						forgetButton.addEventListener('tap', function(event) {
+							$.openWindow({
+								url: 'forget_password.html',
+								id: 'forget_password',
+								show: {
+									aniShow: 'pop-in'
+								},
+								styles: {
+									popGesture: 'hide'
+								},
+								waiting: {
+									autoShow: false
+								}
+							});
+						}, false);*/
+						//
+						/*window.addEventListener('resize', function() {
+							oauthArea.style.display = document.body.clientHeight > 400 ? 'block' : 'none';
+						}, false);*/
+						//
 						var backButtonPress = 0;
 						$.back = function(event) {
 							backButtonPress++;
@@ -216,6 +330,34 @@
 					}
 				});
 			}(mui, document));
+			document.addEventListener( "plusready", function(){
+			    message = document.getElementById("message");
+			    // 监听点击消息事件
+			    plus.push.addEventListener( "click", function( msg ) {
+			        // 判断是从本地创建还是离线推送的消息
+			        switch( msg.payload ) {
+			            case "LocalMSG":
+			                outSet( "点击本地创建消息启动：" );
+			            break;
+			            default:
+			                outSet( "点击离线推送消息启动：");
+			            break;
+			        }
+			        // 提示点击的内容
+			        plus.ui.alert( msg.content );
+			        // 处理其它数据
+			        logoutPushMsg( msg );
+			    }, false );
+			    // 监听在线消息事件
+			    plus.push.addEventListener( "receive", function( msg ) {
+			        if ( msg.aps ) {  // Apple APNS message
+			            outSet( "接收到在线APNS消息：" );
+			        } else {
+			            outSet( "接收到在线透传消息：" );
+			        }
+			        logoutPushMsg( msg );
+			    }, false );
+			}, false );
 		</script>
 	</body>
 

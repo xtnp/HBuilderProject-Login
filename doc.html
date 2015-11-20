@@ -36,6 +36,7 @@
 				var adHeight = parseInt(height)-45;
 				
 				var url = self.url;
+				url+=(url.indexOf("?")>-1?"&":"?")+"isAppflag=1";
 				var ad = plus.webview.create(url,'ad',{height:adHeight+'px',top:'45px'});
 				ad.appendJsFile("_www/js/jquery.js");
 				ad.appendJsFile("_www/js/mui.min.js")
