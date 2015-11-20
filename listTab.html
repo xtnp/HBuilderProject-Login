@@ -111,7 +111,7 @@
 			{{else}}
 			<div id="tab{{id}}" class="mui-slider-item mui-control-content">
 			{{/if}}
-				<div id="scroll{{id}}" class="mui-scroll-wrapper" data-pageno="{{id+1}}" data-url="{{url}}">
+				<div id="scroll{{id}}" class="mui-scroll-wrapper" data-pageno="1" data-pagecount="{{pageCount}}" data-url="{{url}}">
 					<div class="mui-scroll">
 						<ul class="mui-table-view">
 							{{each list as value i}}
@@ -172,6 +172,9 @@
 								if(data.count){
 									obj.count=data.count;
 								}
+								if(data.pageCount){
+									obj.pageCount=data.pageCount;
+								}
 								if(data.docs){
 									obj.list=data.docs; 
 									for(var j=0;j<obj.list.length;j++){
@@ -218,8 +221,13 @@
 									var self = this;
 									setTimeout(function() {
 										var ul = self.element.querySelector('.mui-table-view');
-										ul.innerHTML=createFragment(index,false);
-										self.endPullDownToRefresh();
+										var html=createFragment(index,false);
+										if(html){
+											ul.innerHTML=html;
+											self.endPullDownToRefresh();
+										}else{
+											self.endPullDownToRefresh(true);
+										}
 									}, 1000);
 								}
 							},
@@ -228,8 +236,13 @@
 									var self = this;
 									setTimeout(function() {
 										var ul = self.element.querySelector('.mui-table-view');
-										ul.innerHTML+=createFragment(index,true);
-										self.endPullUpToRefresh();
+										var html=createFragment(index,true);
+										if(html){
+											ul.innerHTML+=html;
+											self.endPullUpToRefresh();
+										}else{
+											self.endPullUpToRefresh(true);
+										}
 									}, 1000);
 								}
 							}
@@ -241,8 +254,13 @@
 						var scroll=document.getElementById("scroll"+index);
 						var nextPageno=1;
 						if(isLoading){
-							nextPageno=scroll.getAttribute("data-pageno")+1;
+							nextPageno=parseInt(scroll.getAttribute("data-pageno"))+1;
+							pagecount=parseInt(scroll.getAttribute("data-pagecount"));
+							if(pagecount<nextPageno){
+								return;
+							}
 						}
+						scroll.setAttribute("data-pageno",nextPageno);
 						var url=scroll.getAttribute("data-url");
 						var list="";
 						jQuery.ajax(url+"&pageno="+nextPageno,{
